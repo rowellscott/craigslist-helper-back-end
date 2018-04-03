@@ -2,8 +2,20 @@ var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
+var favicon = require('serve-favicon')
+var path = require('path')
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mongoose = require('mongoose');
+var session = require('express-session')
+var passport = require('passport');
+var cors = require('cors');
+require("dotenv").config();
+
+//Import Passport Strategy and Other Functions
+require('./configs/passport-config')
+
+mongoose.connect(process.env.MONGODB_URI);
 
 var index = require('./routes/index');
 var users = require('./routes/users');
@@ -21,6 +33,24 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+//passport session
+app.use(session({
+  secret: "secret",
+  resave: true, 
+  saveUninitialized: true
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(
+  cors({
+    credentials: true,
+    origin: ['http://localhost:4200']
+  })
+);
+
+
 
 app.use('/', index);
 app.use('/users', users);
